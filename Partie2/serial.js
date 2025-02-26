@@ -1,31 +1,38 @@
-const { SerialPort } = require('serialport'); 
-
+const { SerialPort, ReadlineParser } = require('serialport');
 
 const port = new SerialPort({
-    path: 'COM4', 
+    path: 'COM4',   // Remplace par ton port série correct
     baudRate: 9600
 });
 
+const parser = new ReadlineParser();
+port.pipe(parser);
 
-port.on('open', () => {
-    console.log('Port série ouvert');
-});
+const codeCorrect = 3;  // Nombre d’appuis requis sur le bouton
+let attenteAppuis = false;
 
+parser.on('data', (data) => {
+    const message = data.toString().trim();
+    console.log(`Données reçues : ${message}`);
 
-port.on('data', (data) => {
-    const luminosite = parseInt(data.toString().trim(), 10); // Convertir les données reçues en nombre
+    if (!isNaN(message)) {
+        const luminosite = parseInt(message, 10);
 
-    console.log(`Luminosité reçue : ${luminosite}`);
+        if (luminosite > 50 && !attenteAppuis) {
+            console.log("⚠️ Baisse de luminosité détectée, allumage de la LED...");
+            port.write("LED_ON\n"); // Envoi de la commande à l’Arduino
+            attenteAppuis = true;
 
-    if (!isNaN(luminosite)) { // Vérifier si c'est bien un nombre
-        if (luminosite > 0) {
-            port.write('ON\n'); // Envoyer la consigne d'allumer la LED
-            console.log('LED ON');
-        } else {
-            port.write('OFF\n'); // Envoyer la consigne d'éteindre la LED
-            console.log('LED OFF');
+            setTimeout(() => {
+                console.log("⏳ Fin des 10 secondes, vérification du code...");
+
+                port.write("CHECK_CODE\n"); // Demande à l'Arduino de vérifier le code
+                attenteAppuis = false;
+            }, 10000);
         }
-    } else {
-        console.log('Valeur reçue invalide');
+    } else if (message === "CODE_CORRECT") {
+        console.log("✅ Code correct ! La LED reste allumée 3 secondes.");
+    } else if (message === "CODE_INCORRECT") {
+        console.log("❌ Code incorrect ! La LED clignote.");
     }
 });
