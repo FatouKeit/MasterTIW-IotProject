@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrôle de la LED</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Contrôle de la LED</h1>
+        <p><strong>Valeur du capteur :</strong> <span id="luminosite">---</span></p>
+
+        <h2>Mode d'éclairage</h2>
+        <label><input type="radio" name="mode" value="auto" checked> Automatique</label>
+        <label><input type="radio" name="mode" value="manuel"> Manuel</label>
+
+        <button id="allumer" disabled>Allumer</button>
+        <button id="eteindre" disabled>Éteindre</button>
+    </div>
+
+    <script>
+        // Mettre à jour la valeur du capteur toutes les 5 secondes
+        function updateLuminosite() {
+            fetch('/luminosite')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('luminosite').innerText = data;
+                })
+                .catch(error => console.error("Erreur de récupération des données :", error));
+        }
+        setInterval(updateLuminosite, 5000);
+        updateLuminosite();
+
+        // Gestion du mode d'éclairage
+        document.querySelectorAll('input[name="mode"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                fetch('/mode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: this.value })
+                });
+
+                document.getElementById('allumer').disabled = (this.value === 'auto');
+                document.getElementById('eteindre').disabled = (this.value === 'auto');
+            });
+        });
+
+        // Boutons pour allumer/éteindre la LED en mode manuel
+        document.getElementById('allumer').addEventListener('click', () => {
+            fetch('/led', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ etat: 'ON' })
+            });
+        });
+
+        document.getElementById('eteindre').addEventListener('click', () => {
+            fetch('/led', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ etat: 'OFF' })
+            });
+        });
+    </script>
+</body>
+</html>
