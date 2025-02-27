@@ -4,25 +4,25 @@ const { SerialPort, ReadlineParser } = require('serialport');
 const app = express();
 const port = 3000;
 
-app.use(express.static('public')); // Servir les fichiers statiques (index.html, CSS...)
-app.use(express.json()); // Pour parser les requêtes JSON
+app.use(express.static('public'));
+app.use(express.json()); 
 
-// Initialisation du port série
+
 const serialPort = new SerialPort({
-    path: 'COM4', // Remplace par ton port réel (ex: COM3 sous Windows ou /dev/ttyUSB0 sous Linux)
+    path: 'COM4', 
     baudRate: 9600
 });
 const parser = serialPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
 let luminosite = 0;
-let mode = 'auto'; // Mode automatique par défaut
+let mode = 'auto'; 
 
-// Lire les données du capteur depuis l'Arduino
+
 parser.on('data', (data) => {
-    luminosite = parseInt(data.trim(), 10); // Convertir en nombre
+    luminosite = parseInt(data.trim(), 10); 
     console.log(`Luminosité reçue : ${luminosite}`);
 
-    if (mode === 'auto') { // Gestion automatique de la LED
+    if (mode === 'auto') { 
         if (luminosite > 30) {
             serialPort.write('ON\n');
             console.log('LED ON (Auto)');
@@ -33,19 +33,19 @@ parser.on('data', (data) => {
     }
 });
 
-// Route pour récupérer la luminosité actuelle
+
 app.get('/luminosite', (req, res) => {
     res.send(luminosite.toString());
 });
 
-// Route pour changer le mode d'éclairage (Auto / Manuel)
+
 app.post('/mode', (req, res) => {
     mode = req.body.mode;
     console.log(`Mode changé en : ${mode}`);
     res.sendStatus(200);
 });
 
-// Route pour contrôler la LED en mode manuel
+
 app.post('/led', (req, res) => {
     if (mode === 'manuel') {
         const etat = req.body.etat;

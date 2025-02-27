@@ -1,14 +1,14 @@
 const { SerialPort, ReadlineParser } = require('serialport');
 
 const port = new SerialPort({
-    path: 'COM4',   // Remplace par ton port série correct
+    path: 'COM4',
     baudRate: 9600
 });
 
 const parser = new ReadlineParser();
 port.pipe(parser);
 
-const codeCorrect = 3;  // Nombre d’appuis requis sur le bouton
+const codeCorrect = 3;
 let attenteAppuis = false;
 
 parser.on('data', (data) => {
@@ -18,9 +18,9 @@ parser.on('data', (data) => {
     if (!isNaN(message)) {
         const luminosite = parseInt(message, 10);
 
-        if (luminosite > 50 && !attenteAppuis) {
-            console.log("⚠️ Baisse de luminosité détectée, allumage de la LED...");
-            port.write("LED_ON\n"); // Envoi de la commande à l’Arduino
+        if (luminosite < 100 && !attenteAppuis) {
+            console.log("⚠️ Baisse de luminosité détectée, allumage du feu orange...");
+            port.write("LED_ORANGE_ON\n"); // Envoi de la commande à l’Arduino
             attenteAppuis = true;
 
             setTimeout(() => {
@@ -31,8 +31,8 @@ parser.on('data', (data) => {
             }, 10000);
         }
     } else if (message === "CODE_CORRECT") {
-        console.log("✅ Code correct ! La LED reste allumée 3 secondes.");
+        console.log("✅ Code correct ! LED VERTE CLIGNOTANTE.");
     } else if (message === "CODE_INCORRECT") {
-        console.log("❌ Code incorrect ! La LED clignote.");
+        console.log("❌ Code incorrect ! LED ROUGE CLIGNOTANTE.");
     }
 });
