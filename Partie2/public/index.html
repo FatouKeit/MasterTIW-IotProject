@@ -19,7 +19,7 @@
     <button id="arreterAlarme">Arrêter l'Alarme</button>
 
     <script>
-        // Fonction pour récupérer les données du port série toutes les 500ms
+        
         function fetchData() {
             fetch('/data')
                 .then(response => response.json())
@@ -31,7 +31,7 @@
                 });
         }
 
-        // Fonction pour envoyer une requête pour ouvrir la porte
+       
         function ouvrirPorte() {
             fetch('/ouvrirPorte', { method: 'POST' })
                 .then(response => response.json())
@@ -43,7 +43,7 @@
                 });
         }
 
-        // Fonction pour envoyer une requête pour arrêter l'alarme
+      
         function arreterAlarme() {
             fetch('/arreterAlarme', { method: 'POST' })
                 .then(response => response.json())
@@ -55,11 +55,11 @@
                 });
         }
 
-        // Ajouter des écouteurs d'événements sur les boutons
+        
         document.getElementById('ouvrirPorte').addEventListener('click', ouvrirPorte);
         document.getElementById('arreterAlarme').addEventListener('click', arreterAlarme);
 
-        // Mettre à jour les données toutes les 500ms
+
         setInterval(fetchData, 500);
     </script>
 </body>

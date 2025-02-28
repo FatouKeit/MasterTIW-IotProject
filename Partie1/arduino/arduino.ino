@@ -105,7 +105,9 @@ void loop() {
                 digitalWrite(ledRouge, HIGH);
                 digitalWrite(buzzer, HIGH);
                 delay(30000);
-                
+                digitalWrite(ledRouge, LOW);
+                digitalWrite(buzzer, LOW);
+                delay(30000);
             }
         }
 
@@ -131,10 +133,9 @@ void loop() {
             digitalWrite(ventINB, LOW);
             delay(3000);
         } else if (command == "ARRETER_ALARME") {
-            
+            Serial.println("Alarme arrêtée");
             digitalWrite(ledRouge, LOW);
                 digitalWrite(buzzer, LOW);
-                Serial.println("Alarme arrêtée");
                 
         }
     }
