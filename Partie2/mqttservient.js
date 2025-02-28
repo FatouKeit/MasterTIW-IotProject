@@ -1,4 +1,4 @@
-const { SerialPort, ReadlineParser } = require('serialport');
+/* const { SerialPort, ReadlineParser } = require('serialport');
 const mqtt = require('mqtt');
 
 const port = new SerialPort({
@@ -80,6 +80,7 @@ function verifierCode() {
         client.publish("properties/VENTILATEUR_INVERSE", "Fermée");
     } else {
         console.log("❌ Code incorrect ! LED ROUGE + Buzzer 3s.");
+        */
         client.publish("properties/code_entre", "Incorrect");
         client.publish("properties/Alarme", "Activée");
         port.write("CODE_INCORRECT\n");
