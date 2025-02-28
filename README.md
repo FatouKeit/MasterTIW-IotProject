@@ -1,6 +1,6 @@
 # MasterTIW-Project
 
-Fatoumata keita
+Fatoumata keita et
 Yannick Faical Compaore
 
 Partie 1 => code Arduino
