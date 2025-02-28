@@ -3,68 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrôle de la LED</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .container { margin-top: 50px; }
-    </style>
+    <title>Statut du Système</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Contrôle de la LED</h1>
-        <p><strong>Valeur du capteur :</strong> <span id="luminosite">---</span></p>
+    <h1>Informations du système</h1>
 
-        <h2>Mode d'éclairage</h2>
-        <label><input type="radio" name="mode" value="auto" checked> Automatique</label>
-        <label><input type="radio" name="mode" value="manuel"> Manuel</label>
+    <h2>Données :</h2>
+    <p id="serialData">En attente des données...</p>
 
-        <button id="allumer" disabled>Allumer</button>
-        <button id="eteindre" disabled>Éteindre</button>
-    </div>
+    <h2>Contrôle du Système :</h2>
+    <!-- Bouton pour ouvrir la porte -->
+    <button id="ouvrirPorte">Ouvrir Porte</button>
+
+    <!-- Bouton pour arrêter l'alarme -->
+    <button id="arreterAlarme">Arrêter l'Alarme</button>
 
     <script>
-        // Mettre à jour la valeur du capteur toutes les 5 secondes
-        function updateLuminosite() {
-            fetch('/luminosite')
-                .then(response => response.text())
+        // Fonction pour récupérer les données du port série toutes les 500ms
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
                 .then(data => {
-                    document.getElementById('luminosite').innerText = data;
+                    document.getElementById('serialData').innerText = data.data;
                 })
-                .catch(error => console.error("Erreur de récupération des données :", error));
-        }
-        setInterval(updateLuminosite, 5000);
-        updateLuminosite();
-
-        // Gestion du mode d'éclairage
-        document.querySelectorAll('input[name="mode"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                fetch('/mode', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mode: this.value })
+                .catch(err => {
+                    console.error('Erreur de récupération des données:', err);
                 });
+        }
 
-                document.getElementById('allumer').disabled = (this.value === 'auto');
-                document.getElementById('eteindre').disabled = (this.value === 'auto');
-            });
-        });
+        // Fonction pour envoyer une requête pour ouvrir la porte
+        function ouvrirPorte() {
+            fetch('/ouvrirPorte', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Porte ouverte');
+                })
+                .catch(err => {
+                    console.error('Erreur lors de l\'ouverture de la porte:', err);
+                });
+        }
 
-        // Boutons pour allumer/éteindre la LED en mode manuel
-        document.getElementById('allumer').addEventListener('click', () => {
-            fetch('/led', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ etat: 'ON' })
-            });
-        });
+        // Fonction pour envoyer une requête pour arrêter l'alarme
+        function arreterAlarme() {
+            fetch('/arreterAlarme', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Alarme arrêtée');
+                })
+                .catch(err => {
+                    console.error('Erreur lors de l\'arrêt de l\'alarme:', err);
+                });
+        }
 
-        document.getElementById('eteindre').addEventListener('click', () => {
-            fetch('/led', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ etat: 'OFF' })
-            });
-        });
+        // Ajouter des écouteurs d'événements sur les boutons
+        document.getElementById('ouvrirPorte').addEventListener('click', ouvrirPorte);
+        document.getElementById('arreterAlarme').addEventListener('click', arreterAlarme);
+
+        // Mettre à jour les données toutes les 500ms
+        setInterval(fetchData, 500);
     </script>
 </body>
 </html>
